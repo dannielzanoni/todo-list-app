@@ -42,3 +42,7 @@ typings
 **\.DS_Store
 **\Thumbs.db
 fly.toml
+
+.log
+.env
+build
