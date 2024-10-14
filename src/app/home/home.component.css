@@ -8,4 +8,7 @@
 .task-list {
   width: 80%;
   max-width: 100rem;
+  min-height: 350px;
+  max-height: 600px;
+  overflow-y: auto;
 }

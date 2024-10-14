@@ -1,7 +1,8 @@
 <div class="task-list-wrapper">
     <div class="task-list">
         <h3>Lista de Tarefas</h3>
-        <p-table [value]="tasks" [tableStyle]="{ 'width': '90rem', 'min-width': '80rem' }">
+        <p-table [rowHover]="true" styleClass="p-datatable-striped" [value]="paginatedTasks"
+            [tableStyle]="{ 'width': '90rem', 'min-width': '80rem', 'height': tableHeight }">
             <ng-template pTemplate="header">
                 <tr>
                     <th>Id</th>
@@ -17,20 +18,26 @@
                     <td>{{ task.title }}</td>
                     <td>{{ task.description }}</td>
                     <td>
-                        <i *ngIf="task.status" class="pi pi-check-circle" style="color: green;"> Concluída</i>
-                        <i *ngIf="!task.status" class="pi pi-exclamation-circle" style="color: orangered;"> Pendente</i>
+                        <i *ngIf="task.isFinished" class="pi pi-check-circle" style="color: green;"> Concluída</i>
+                        <i *ngIf="!task.isFinished" class="pi pi-exclamation-circle" style="color: orangered;">
+                            Pendente
+                        </i>
                     </td>
-                    <!-- <td>
-                        <i class="pi pi-pencil"></i>
-                    </td> -->
                     <td>
-                        <p-menu #menu [popup]="true" [model]="getMenuItems(task)" appendTo="body"></p-menu>
-                        <p-button [icon]="'pi pi-ellipsis-v'" styleClass="p-button-text"
-                            (click)="menu.toggle($event)"></p-button>
+                        <p-dropdown [options]="getDropdownOptions(task)" [(ngModel)]="selectedAction"
+                            (onChange)="handleDropdownChange($event, task)" placeholder="Ações" [appendTo]="'body'">
+                            <ng-template let-option pTemplate="item">
+                                <div class="flex align-items-center">
+                                    <i [class]="option.icon" style="margin-right: 8px;"></i>
+                                    <span>{{ option.label }}</span>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
                     </td>
                 </tr>
             </ng-template>
         </p-table>
+
 
         <p-paginator [rows]="itemsPerPage" [totalRecords]="totalItems" [first]="(currentPage - 1) * itemsPerPage"
             (onPageChange)="onPageChange($event)">
@@ -43,15 +50,48 @@
 <p-dialog header="Criação de Tarefa" [modal]="true" [(visible)]="visible" [style]="{ width: '25rem' }">
     <span class="p-text-secondary">Preencha os campos.</span>
     <div class="flex align-items-center gap-3 mb-3" style="margin-top: 20px;">
-        <label for=" title" class="font-semibold w-6rem" style="margin-right: 10px;">Título:</label>
-        <input pInputText id="title" class="flex-auto" autocomplete="off" />
+        <label for="title" class="font-semibold w-6rem" style="margin-right: 10px;">Título:</label>
+        <input pInputText id="title" [(ngModel)]="newTaskTitle" class="flex-auto" autocomplete="off" />
     </div>
     <div class="flex align-items-center gap-3 mb-5">
         <label for="description" class="font-semibold w-6rem" style="margin-right: 10px;">Descrição:</label>
-        <input pInputText id="description" class="flex-auto" autocomplete="off" />
+        <input pInputText id="description" [(ngModel)]="newTaskDescription" class="flex-auto" autocomplete="off" />
     </div>
     <div class="flex justify-content-end gap-2">
         <p-button label="Cancelar" severity="secondary" (onClick)="visible = false" />
-        <p-button label="Criar" (onClick)="visible = false" />
+        <p-button label="Criar" (onClick)="createTask()" />
+    </div>
+</p-dialog>
+
+<p-dialog header="Edição de Tarefa" [modal]="true" [(visible)]="editDialogVisible" [style]="{ width: '25rem' }"
+    (onHide)="resetDropdown()">
+
+    <span class="p-text-secondary">Edite os campos da tarefa.</span>
+    <div class="flex align-items-center gap-3 mb-3" style="margin-top: 20px;">
+        <label for="editTitle" class="font-semibold w-6rem" style="margin-right: 10px;">Título:</label>
+        <input pInputText id="editTitle" [(ngModel)]="selectedTask.title" class="flex-auto" autocomplete="off" />
+    </div>
+    <div class="flex align-items-center gap-3 mb-3">
+        <label for="editDescription" class="font-semibold w-6rem" style="margin-right: 10px;">Descrição:</label>
+        <input pInputText id="editDescription" [(ngModel)]="selectedTask.description" class="flex-auto"
+            autocomplete="off" />
+    </div>
+    <div class="flex align-items-center gap-3 mb-4">
+        <label for="isCompleted" class="font-semibold w-6rem" style="margin-right: 10px;">Concluída:</label>
+        <p-checkbox [(ngModel)]="selectedTask.isFinished" binary="true"></p-checkbox>
+    </div>
+    <div class="flex justify-content-end gap-2">
+        <p-button label="Cancelar" severity="secondary" (onClick)="closeDialog()" />
+        <p-button label="Salvar" (onClick)="updateTask()" />
+    </div>
+</p-dialog>
+
+<p-dialog header="Confirmação" [(visible)]="confirmationDialogVisible" [modal]="true" [style]="{ width: '30rem' }"
+    (onHide)="resetConfirmationDialog()">
+
+    <span class="p-text-secondary">Você tem certeza que deseja excluir esta tarefa?</span>
+    <div class="flex justify-content-end gap-2" style="margin-top: 20px;">
+        <p-button label="Não" severity="secondary" (onClick)="confirmationDialogVisible = false" />
+        <p-button label="Sim" (onClick)="confirmDelete()" />
     </div>
 </p-dialog>

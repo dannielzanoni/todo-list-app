@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-signup',
   templateUrl: './signup.component.html',
-  styleUrls: ['./signup.component.css']  // Corrigido para 'styleUrls'
+  styleUrls: ['./signup.component.css']
 })
 export class SignupComponent {
 
@@ -12,7 +13,7 @@ export class SignupComponent {
   password: string = '';
   confirmPassword: string = '';
 
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private router: Router) { }
 
   onSignUp(): void {
     if (this.password !== this.confirmPassword) {
@@ -28,6 +29,7 @@ export class SignupComponent {
     this.authService.signUp(userData).subscribe(
       (response: any) => {
         console.log('Signup successful!', response);
+        this.router.navigate(['/home']);
       },
       (error: any) => {
         console.error('Signup failed', error);

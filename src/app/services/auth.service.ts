@@ -9,11 +9,18 @@ import { map, Observable } from 'rxjs';
 
 export class AuthService {
   private apiUrl = 'https://localhost:7135/api/auth';
+  router: any;
 
   constructor(private http: HttpClient) { }
 
   signUp(userData: { username: string; password: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/signup`, userData);
+    return this.http.post<any>(`${this.apiUrl}/signup`, userData)
+      .pipe(map(response => {
+        if (response && response.token) {
+          localStorage.setItem('token', response.token);
+        }
+        return response;
+      }));
   }
 
   login(username: string, password: string): Observable<any> {
@@ -28,10 +35,24 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem('token');
+    this.router.navigate(['/login']);
   }
 
   isAuthenticated(): boolean {
     const token = localStorage.getItem('token');
-    return !!token;
+
+    if (token) {
+      const jwtPayload = JSON.parse(atob(token.split('.')[1]));
+      const now = Math.floor(new Date().getTime() / 1000);
+
+      if (jwtPayload.exp && jwtPayload.exp > now) {
+        return true;
+      } else {
+        this.logout();
+        return false;
+      }
+    }
+    return false;
   }
+
 }

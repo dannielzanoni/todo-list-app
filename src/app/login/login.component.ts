@@ -13,11 +13,18 @@ export class LoginComponent {
 
   constructor(private authService: AuthService, private router: Router) { }
 
+  ngOnInit() {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/home']);
+    }
+  }
+
   onLogin() {
     this.authService.login(this.username, this.password).subscribe({
       next: (response) => {
-        console.log('Login bem-sucedido:', response);
-        this.router.navigate(['/home']);
+        if (this.authService.isAuthenticated()) {
+          this.router.navigate(['/home']);
+        }
       },
       error: (err) => {
         console.error('Erro ao fazer login:', err);
