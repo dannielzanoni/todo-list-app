@@ -1,0 +1,11 @@
+.task-list-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 50px;
+}
+
+.task-list {
+  width: 80%;
+  max-width: 100rem;
+}

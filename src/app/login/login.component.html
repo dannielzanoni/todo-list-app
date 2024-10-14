@@ -1,0 +1,21 @@
+<div class="login-container">
+    <h2>Login To-Do List App</h2>
+    <form (ngSubmit)="onLogin()">
+        <div>
+            <label for="username">Usuário</label>
+            <input style="width: 100%" type="text" id="username" pInputText [(ngModel)]="username" name="username"
+                required />
+        </div>
+        <div>
+            <label for="password">Senha</label>
+            <p-password [(ngModel)]="password" type="password" id="password" name="password" [feedback]="false"
+                [toggleMask]="true" required>
+            </p-password>
+        </div>
+        <p-button type="submit" label="Login"></p-button>
+    </form>
+    <div>
+        <br>
+        <label>Criar uma conta? <a href="signup">Sign Up</a></label>
+    </div>
+</div>

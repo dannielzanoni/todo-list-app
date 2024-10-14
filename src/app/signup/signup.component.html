@@ -1,0 +1,33 @@
+<div class="signup-container">
+    <h2>SignUp</h2>
+    <form (ngSubmit)="onSignUp()" #signupForm="ngForm">
+        <div>
+            <label for="username">Usuário</label>
+            <input style="width: 100%" type="text" id="username" pInputText [(ngModel)]="username" name="username"
+                required />
+        </div>
+        <div>
+            <label for="password">Senha</label>
+            <p-password [(ngModel)]="password" type="password" id="password" [feedback]="true" name="password"
+                [toggleMask]="true" required>
+                <ng-template pTemplate="header">
+                    <h5>Escolha uma senha</h5>
+                </ng-template>
+            </p-password>
+        </div>
+        <div>
+            <label for="confirmPassword">Confirme a Senha</label>
+            <p-password [(ngModel)]="confirmPassword" type="password" id="confirmPassword" [feedback]="false"
+                name="confirmPassword" [toggleMask]="true" required>
+                <ng-template pTemplate="header">
+                    <h5>Confirme sua senha</h5>
+                </ng-template>
+            </p-password>
+        </div>
+        <p-button type="submit" label="Sign Up"
+            [disabled]="!signupForm.valid || password !== confirmPassword"></p-button>
+        <div *ngIf="password && confirmPassword && password !== confirmPassword" style="color: red; margin-top: 10px;">
+            As senhas não coincidem.
+        </div>
+    </form>
+</div>
