@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, map, Observable, throwError } from 'rxjs';
-import { environment } from '../environments/environment';
 import { Router } from '@angular/router';
 import { ToastService } from './toast.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'

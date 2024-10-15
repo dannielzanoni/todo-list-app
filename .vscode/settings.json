@@ -1,4 +1,8 @@
 {
     "appService.defaultWebAppToDeploy": "/subscriptions/dca58240-92a2-4226-aec9-67430af33233/resourceGroups/rg1/providers/Microsoft.Web/sites/todolistappangular",
-    "appService.deploySubpath": "dist\\todo-list-app"
+    "appService.deploySubpath": "dist\\todo-list-app",
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ]
 }
