@@ -8,11 +8,11 @@ RUN npm install
 COPY . .
 RUN npm run build -- --configuration production 
 
-FROM nginx:alpine
-
-COPY nginx.conf /etc/nginx/nginx.conf
+FROM nginx:latest
 
 COPY --from=build /app/dist/todo-list-app /usr/share/nginx/html
+
+COPY nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
 
