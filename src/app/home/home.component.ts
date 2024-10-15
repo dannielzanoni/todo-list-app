@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
 import { TaskService } from '../services/task.service';
-import { MenuItem } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { TodoItem } from '../model/todo-item';
 import { AuthService } from '../services/auth.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
+  styleUrl: './home.component.css',
+  providers: [MessageService]
 })
 export class HomeComponent {
   tasks: TodoItem[] = [];
@@ -29,26 +31,10 @@ export class HomeComponent {
   confirmationDialogVisible = false;
   taskIdToDelete: number | null = null;
 
-  constructor(private taskService: TaskService, private authService: AuthService) { }
+  constructor(private taskService: TaskService, private authService: AuthService, private toastService: ToastService) { }
 
   ngOnInit() {
     this.loadTasks();
-  }
-
-  showDialog() {
-    this.visible = true;
-    this.newTaskTitle = '';
-    this.newTaskDescription = '';
-  }
-
-  onPageChange(event: any) {
-    this.currentPage = event.page + 1;
-    this.updatePaginatedTasks();
-  }
-
-  updatePaginatedTasks() {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    this.paginatedTasks = this.tasks.slice(startIndex, startIndex + this.itemsPerPage);
   }
 
   loadTasks() {
@@ -83,8 +69,8 @@ export class HomeComponent {
         value: 'delete'
       },
       {
-        label: task.status ? 'Marcar como Pendente' : 'Marcar como Concluída',
-        icon: task.status ? 'pi pi-times-circle' : 'pi pi-check-circle',
+        label: task.isFinished ? 'Marcar como Pendente' : 'Marcar como Concluída',
+        icon: task.isFinished ? 'pi pi-times-circle' : 'pi pi-check-circle',
         value: 'toggle'
       }
     ];
@@ -104,12 +90,21 @@ export class HomeComponent {
         break;
       case 'toggle':
         this.toggleTaskStatus(task);
-        this.selectedAction = null;
         break;
     }
   }
 
   createTask() {
+    if (!this.newTaskTitle.trim()) {
+      this.toastService.showError("O título da tarefa não pode estar vazio.");
+      return;
+    }
+
+    if (!this.newTaskDescription.trim()) {
+      this.toastService.showError("A descrição da tarefa não pode estar vazia.");
+      return;
+    }
+
     const newTask: TodoItem = new TodoItem(0, this.newTaskTitle, this.newTaskDescription, false, 0);
 
     this.taskService.createTask(newTask).subscribe({
@@ -117,6 +112,7 @@ export class HomeComponent {
         console.log('Tarefa criada com sucesso', response);
         this.visible = false;
         this.loadTasks();
+        this.toastService.showSuccess("Tarefa criada com sucesso!");
       },
       error: (err) => {
         console.error('Erro ao criar a tarefa', err);
@@ -136,9 +132,11 @@ export class HomeComponent {
           console.log('Tarefa editada com sucesso', response);
           this.editDialogVisible = false;
           this.loadTasks();
+          this.toastService.showSuccess("Tarefa editada com sucesso!");
         },
         error: (err) => {
           console.error('Erro ao editar a tarefa', err);
+          this.toastService.showError("Erro ao excluir a tarefa!" + err.message);
         }
       });
     }
@@ -153,10 +151,12 @@ export class HomeComponent {
     if (this.taskIdToDelete !== null) {
       this.taskService.deleteTask(this.taskIdToDelete).subscribe({
         next: () => {
+          this.toastService.showSuccess("Tarefa excluída com sucesso!");
           this.loadTasks();
           this.confirmationDialogVisible = false;
         },
         error: (err) => {
+          this.toastService.showError("Erro ao excluir a tarefa!" + err.message);
           console.error(err);
           this.confirmationDialogVisible = false;
         }
@@ -169,8 +169,41 @@ export class HomeComponent {
     this.confirmationDialogVisible = true;
   }
 
-  toggleTaskStatus(task: any) {
-    task.status = !task.status;
+  toggleTaskStatus(task: TodoItem) {
+    task.isFinished = !task.isFinished;
+
+    this.taskService.updateTaskStatus(task).subscribe(
+      (updatedTask) => {
+        if (updatedTask) {
+          task.isFinished = updatedTask.isFinished;
+          this.toastService.showSuccess("Status da tarefa atualizada com sucesso!");
+          console.log('Status da tarefa atualizado com sucesso:', updatedTask);
+          this.selectedAction = "Ações";
+        }
+      },
+      (error) => {
+        console.error('Erro ao atualizar o status da tarefa:', error);
+        this.selectedAction = "Ações";
+      }
+    );
+  }
+
+  //#region  Métodos privados
+
+  showDialog() {
+    this.visible = true;
+    this.newTaskTitle = '';
+    this.newTaskDescription = '';
+  }
+
+  onPageChange(event: any) {
+    this.currentPage = event.page + 1;
+    this.updatePaginatedTasks();
+  }
+
+  updatePaginatedTasks() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    this.paginatedTasks = this.tasks.slice(startIndex, startIndex + this.itemsPerPage);
   }
 
   setTableHeight() {
@@ -197,4 +230,5 @@ export class HomeComponent {
     this.taskIdToDelete = null;
     this.selectedAction = "Ações";
   }
+  //#endregion
 }

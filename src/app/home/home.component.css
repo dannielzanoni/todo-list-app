@@ -3,6 +3,7 @@
   justify-content: center;
   align-items: center;
   margin-top: 50px;
+  margin-left: 80px;
 }
 
 .task-list {
@@ -11,4 +12,8 @@
   min-height: 350px;
   max-height: 600px;
   overflow-y: auto;
+}
+
+.row-completed {
+  background-color: #d4edda;
 }

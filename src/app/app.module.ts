@@ -26,6 +26,9 @@ import { MenuModule } from 'primeng/menu';
 import { ToastModule } from 'primeng/toast';
 import { CheckboxModule } from 'primeng/checkbox';
 import { DropdownModule } from 'primeng/dropdown';
+import { MessagesModule } from 'primeng/messages';
+import { ToastService } from './services/toast.service';
+import { MessageService } from 'primeng/api';  // Import MessageService
 
 @NgModule({
   declarations: [
@@ -54,11 +57,14 @@ import { DropdownModule } from 'primeng/dropdown';
     MenuModule,
     ToastModule,
     CheckboxModule,
-    DropdownModule
+    DropdownModule,
+    MessagesModule
   ],
   providers: [
     AuthService,
-    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+    ToastService,
+    MessageService
   ],
   bootstrap: [AppComponent]
 })

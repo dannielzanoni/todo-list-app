@@ -24,7 +24,11 @@ export class TaskService {
     return this.http.put(`${this.apiUrl}/update/${todoItem.id}`, todoItem);
   }
 
-  deleteTask(taskId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/delete/${taskId}`);
+  deleteTask(todoItemId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/delete/${todoItemId}`);
+  }
+
+  updateTaskStatus(todoItem: TodoItem): Observable<TodoItem> {
+    return this.http.put<TodoItem>(`${this.apiUrl}/update/${todoItem.id}`, todoItem);
   }
 }

@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-nav-bar',
@@ -6,12 +8,19 @@ import { Component } from '@angular/core';
   styleUrl: './nav-bar.component.css'
 })
 export class NavBarComponent {
-  items: any[] | undefined;
+  isLoggedIn: boolean = false;
+  username: string = '';
 
-  ngOnInit() {
-    this.items = [
-      { label: 'Login', icon: 'pi pi-sign-in', routerLink: '/login' },
-      { label: 'SignUp', icon: 'pi pi-user-plus', routerLink: '/signup' }
-    ];
+  constructor(private router: Router, private authService: AuthService) { }
+
+  ngOnInit(): void {
+    this.authService.isLoggedIn$.subscribe(loggedIn => {
+      this.isLoggedIn = loggedIn;
+      this.username = this.authService.getUsername();
+    });
+  }
+
+  logout(): void {
+    this.authService.logout();
   }
 }

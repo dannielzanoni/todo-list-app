@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, throwError } from 'rxjs';
 import { environment } from '../environments/environment';
-
+import { Router } from '@angular/router';
+import { ToastService } from './toast.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,18 +11,35 @@ import { environment } from '../environments/environment';
 
 export class AuthService {
   private apiUrl = environment.apiUrl + '/auth';
-  router: any;
+  private loggedIn = new BehaviorSubject<boolean>(this.isAuthenticated());
+  private usernameSource = new BehaviorSubject<string>(this.getUsername());
 
-  constructor(private http: HttpClient) { }
+  isLoggedIn$ = this.loggedIn.asObservable();
+  username$ = this.usernameSource.asObservable();
+
+  constructor(private http: HttpClient, private router: Router, private toastService: ToastService) { }
 
   signUp(userData: { username: string; password: string }): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/signup`, userData)
-      .pipe(map(response => {
-        if (response && response.token) {
-          localStorage.setItem('token', response.token);
-        }
-        return response;
-      }));
+      .pipe(
+        map(response => {
+          if (response && response.token) {
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('username', response.userName);
+
+            this.loggedIn.next(true);
+            this.usernameSource.next(response.userName);
+          }
+          const successMessage = response.message;
+          this.toastService.showSuccess(successMessage)
+          return response;
+        }),
+        catchError(error => {
+          const errorMessage = error.error?.message || 'Erro desconhecido';
+          this.toastService.showError(errorMessage);
+          return throwError(error);
+        })
+      );
   }
 
   login(username: string, password: string): Observable<any> {
@@ -29,6 +47,10 @@ export class AuthService {
       .pipe(map(response => {
         if (response && response.token) {
           localStorage.setItem('token', response.token);
+          localStorage.setItem('username', response.userName);
+
+          this.loggedIn.next(true);
+          this.usernameSource.next(response.userName);
         }
         return response;
       }));
@@ -36,24 +58,18 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    this.loggedIn.next(false);
+    this.usernameSource.next('');
     this.router.navigate(['/login']);
   }
 
   isAuthenticated(): boolean {
     const token = localStorage.getItem('token');
-
-    if (token) {
-      const jwtPayload = JSON.parse(atob(token.split('.')[1]));
-      const now = Math.floor(new Date().getTime() / 1000);
-
-      if (jwtPayload.exp && jwtPayload.exp > now) {
-        return true;
-      } else {
-        this.logout();
-        return false;
-      }
-    }
-    return false;
+    return !!token;
   }
 
+  getUsername(): string {
+    return localStorage.getItem('username') || '';
+  }
 }

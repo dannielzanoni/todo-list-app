@@ -13,7 +13,7 @@
                 </tr>
             </ng-template>
             <ng-template pTemplate="body" let-task>
-                <tr>
+                <tr [ngClass]="{ 'row-completed': task.isFinished, 'row-pending': !task.isFinished }">
                     <td>{{ task.id }}</td>
                     <td>{{ task.title }}</td>
                     <td>{{ task.description }}</td>
