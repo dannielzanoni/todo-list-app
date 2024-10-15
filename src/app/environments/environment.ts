@@ -1,4 +1,4 @@
 export const environment = {
     production: false,
-    apiUrl: 'https://todolistapibackend.azurewebsites.net',
+    apiUrl: 'https://localhost:7135/api',
 };

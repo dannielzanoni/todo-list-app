@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://todolistapibackend.azurewebsites.net',
+    apiUrl: 'https://todolistapibackend.azurewebsites.net/api',
 };
